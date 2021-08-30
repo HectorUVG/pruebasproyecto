@@ -21,7 +21,7 @@
 #define freqPWM 5000  // Frecuencia en Hz
 #define resolution 8  // 1-16 bits de resolución 
 
-#define boton1 13
+#define B1 13
 
 #define servo 12
 // Paso 1: selección de parámetros de la señal PWM
@@ -35,6 +35,11 @@
 //*****************************************************************************
 void configurarPWM(void);
 void leds(void);
+void boton(void);
+
+//para prueba
+void botonTemporal(void);
+void temp2(void);
 //*****************************************************************************
 //Variables Globales
 //*****************************************************************************
@@ -48,13 +53,19 @@ int decimales = 0;
 //var para el interruptor del boton
 int banderaB1 = 0;
 
+//boton
+int contBoton = 0;
 
-
+//funcion temporal prueba servo
+int temporal = 0;
 
 //*****************************************************************************
 //ISR
 //*****************************************************************************
-
+void IRAM_ATTR boton(){
+  contBoton = 1;
+  
+}
 //*****************************************************************************
 //Configuracion
 //*****************************************************************************
@@ -62,15 +73,27 @@ int banderaB1 = 0;
 void setup() {
   configurarPWM();
 
+  //boton
+  pinMode(B1, INPUT_PULLUP);
+  attachInterrupt(B1, boton, RISING);
 }
 //*****************************************************************************
 //Loop principal
 //*****************************************************************************
 
 void loop() {
-  temperatura = 37.5;
+ // temperatura = 37.5;
+
+ //para prueba
+  botonTemporal();
+  temp2();
+
+ 
   leds();
  //yes
+
+ 
+
 }
 
 //****************************************************************
@@ -103,18 +126,65 @@ void leds(){
     ledcWrite(pwmChannelV, 200);
     ledcWrite(pwmChannelA, 0);
     ledcWrite(pwmChannelR, 0);
+
+    ledcWrite(pwmChnlServo, 10);
   }
 
   if  (temperatura > 37.0 && temperatura < 37.5){
     ledcWrite(pwmChannelV, 0);
     ledcWrite(pwmChannelA, 200);
     ledcWrite(pwmChannelR, 0);
+
+    ledcWrite(pwmChnlServo,20);
   }
 
   if (temperatura >= 37.5){
     ledcWrite(pwmChannelV, 0);
     ledcWrite(pwmChannelA, 0);
     ledcWrite(pwmChannelR, 200);
+
+    ledcWrite(pwmChnlServo, 30);
   }
 
+}
+
+//*****************************************************************************
+//Funcion temporal de boton para probar servo
+//*****************************************************************************
+void botonTemporal(){
+  
+  if (contBoton == 1 && temporal < 2){
+    temporal = temporal + 1;
+    delay(150);
+    contBoton = 0;
+    delay(150);
+    
+  }
+
+  if (contBoton == 1 && temporal ==2 ){
+    temporal = 0 ;
+    delay(150);
+    contBoton = 0;
+    delay(150);
+  }
+  
+ 
+}
+
+//*****************************************************************************
+//Funcion temporal de boton para probar servo2
+//*****************************************************************************
+
+void temp2(){
+  if(temporal == 0){
+    temperatura = 37.0;
+  }
+
+  if(temporal == 1){
+    temperatura = 37.3;
+  }
+
+  if(temporal == 2){
+    temperatura = 37.5;
+  }
 }

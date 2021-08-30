@@ -70,7 +70,7 @@ void setup() {
 void loop() {
   temperatura = 37.5;
   leds();
- //yes
+ 
 }
 
 //****************************************************************
@@ -99,19 +99,24 @@ void configurarPWM(void){
 //Funcion Leds
 //*****************************************************************************
 void leds(){
-  if (temperatura <= 37.0){
+  /**
+   * De acuerdo con la tabla de las instrucciones del proyecto, los leds 
+   * cambiaran de verde a amarillo y a rojo dependiendo de la temperatura que
+   * marque el sensor
+   */
+  if (temperatura <= 37.0){//menor o igual a 37 es verde
     ledcWrite(pwmChannelV, 200);
     ledcWrite(pwmChannelA, 0);
     ledcWrite(pwmChannelR, 0);
   }
 
-  if  (temperatura > 37.0 && temperatura < 37.5){
-    ledcWrite(pwmChannelV, 0);
+  if  (temperatura > 37.0 && temperatura < 37.5){//mayor a 37 y menor a 37.5 es
+    ledcWrite(pwmChannelV, 0);//                  amarillo
     ledcWrite(pwmChannelA, 200);
     ledcWrite(pwmChannelR, 0);
   }
 
-  if (temperatura >= 37.5){
+  if (temperatura >= 37.5){//mayor o igual a 37.5 es rojo
     ledcWrite(pwmChannelV, 0);
     ledcWrite(pwmChannelA, 0);
     ledcWrite(pwmChannelR, 200);

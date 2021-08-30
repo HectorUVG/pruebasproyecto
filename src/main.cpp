@@ -123,27 +123,27 @@ void configurarPWM(void){
 //*****************************************************************************
 void leds(){
   if (temperatura <= 37.0){
-    ledcWrite(pwmChannelV, 200);
+    ledcWrite(pwmChannelV, 255);
     ledcWrite(pwmChannelA, 0);
     ledcWrite(pwmChannelR, 0);
 
-    ledcWrite(pwmChnlServo, 10);
+    ledcWrite(pwmChnlServo, 5);
   }
 
   if  (temperatura > 37.0 && temperatura < 37.5){
     ledcWrite(pwmChannelV, 0);
-    ledcWrite(pwmChannelA, 200);
+    ledcWrite(pwmChannelA, 255);
     ledcWrite(pwmChannelR, 0);
 
-    ledcWrite(pwmChnlServo,20);
+    ledcWrite(pwmChnlServo,19);
   }
 
   if (temperatura >= 37.5){
     ledcWrite(pwmChannelV, 0);
     ledcWrite(pwmChannelA, 0);
-    ledcWrite(pwmChannelR, 200);
+    ledcWrite(pwmChannelR, 255);
 
-    ledcWrite(pwmChnlServo, 30);
+    ledcWrite(pwmChnlServo, 32);
   }
 
 }

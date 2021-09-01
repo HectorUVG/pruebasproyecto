@@ -8,10 +8,30 @@
 //*****************************************************************************
 
 #include <Arduino.h>
+#include "Displays7seg.h"
 //*****************************************************************************
 //Definicion de pines
 //*****************************************************************************
 
+//displays
+#define Dis1 18
+#define Dis2 19
+#define Dis3 21
+
+//pines del display
+#define g 26
+#define f 25
+#define a 33
+#define b 32 
+#define e 3
+#define d 1
+#define c 22
+#define p 23
+
+//prescaler para contador
+#define prescaler 80
+
+//leds
 #define ledV 0
 #define ledA 2
 #define ledR 15
@@ -20,9 +40,10 @@
 #define pwmChannelR 3
 #define freqPWM 5000  // Frecuencia en Hz
 #define resolution 8  // 1-16 bits de resolución 
+//boton
+#define B1 13
 
-#define boton1 13
-
+//servo
 #define servo 12
 // Paso 1: selección de parámetros de la señal PWM
 #define pwmChnlServo 2 // 16 canales 0-15
@@ -35,42 +56,131 @@
 //*****************************************************************************
 void configurarPWM(void);
 void leds(void);
+void boton(void);
+
+//para prueba
+void botonTemporal(void);
+void temp2(void);
+
+//Displays
+void configurarTimer(void);
+//void numDisplay(int);
+void cambioDisplay(int);
 //*****************************************************************************
 //Variables Globales
 //*****************************************************************************
+//Instanciar timer
+hw_timer_t *timer = NULL;
+
+//variable para el contador del timer
+int contadorTimer = 0;
+
 float temperatura = 0.0;
 
 //variables al separar el valor del sensor
-int decenas = 0;
-int unidades = 0;
-int decimales = 0;
+int decena = 0;
+int unidad = 0;
+int decimal = 0;
 
 //var para el interruptor del boton
 int banderaB1 = 0;
 
+//boton
+int contBoton = 0;
 
-
+//funcion temporal prueba servo
+int temporal = 0;
 
 //*****************************************************************************
 //ISR
 //*****************************************************************************
 
+void IRAM_ATTR ISRTimer0()
+{
+  contadorTimer++; // es como sumarle 1
+  if (contadorTimer > 2)
+  {
+    contadorTimer = 0;
+  }
+  //de 0 a 2 porque solo tengo 3 displays
+}
+
+void IRAM_ATTR boton(){
+  contBoton = 1;
+  
+}
 //*****************************************************************************
 //Configuracion
 //*****************************************************************************
 
 void setup() {
+  configurarTimer();
   configurarPWM();
+  configurarDisplay(a, b, c, d, e, f, g, p);
 
+  //displays
+  pinMode(Dis1,OUTPUT);
+  pinMode(Dis2,OUTPUT);
+  pinMode(Dis3,OUTPUT);
+  digitalWrite(Dis1,0);
+  digitalWrite(Dis2,0);
+  digitalWrite(Dis3,0);
+
+  //boton
+  pinMode(B1, INPUT_PULLUP);
+  attachInterrupt(B1, boton, RISING);
 }
 //*****************************************************************************
 //Loop principal
 //*****************************************************************************
 
 void loop() {
-  temperatura = 37.5;
-  leds();
+ // temperatura = 37.5;
+
+ //para prueba
+  botonTemporal();
+  temp2();
+
  
+  leds();
+ //yes
+
+  decena = 1;
+  unidad = 2;
+  decimal = 0;
+
+  //contadorTimer permite cambiar entre los 3 displays cada 10 milisegundos
+  cambioDisplay(contadorTimer);
+  
+ 
+
+}
+
+//*****************************************************************************
+//Funcion configurar timer
+//*****************************************************************************
+void configurarTimer(void)
+{
+
+  //Fosc(Frecuencia de oscilacion) = 80 MHz = 80,000,000 Hz
+  // Fosc / prescaler = 80,000,000 / 80 = 1,000,000 Hz
+  //Tosc(Tiempo de oscilacion) = 1 / Fosc = 1 uSeg
+
+  //Paso2. Seleccionar timer
+  // Timer 0, prescaler = 80, flanco de subida
+  timer = timerBegin(0, prescaler, true);
+
+  //paso3. Asignar el handler de la interrupcion
+
+  timerAttachInterrupt(timer, &ISRTimer0, true);
+
+  //paso4. Programar alarma
+  // Tic = 1 uSeg
+  // Frcuencia = se necesita 10 ms = 10,000 Tics, para que el ojo no lo note
+  timerAlarmWrite(timer, 10000, true);
+
+  //paso5. Iniciar la alarma
+  timerAlarmEnable(timer);
 }
 
 //****************************************************************
@@ -99,27 +209,110 @@ void configurarPWM(void){
 //Funcion Leds
 //*****************************************************************************
 void leds(){
-  /**
-   * De acuerdo con la tabla de las instrucciones del proyecto, los leds 
-   * cambiaran de verde a amarillo y a rojo dependiendo de la temperatura que
-   * marque el sensor
-   */
-  if (temperatura <= 37.0){//menor o igual a 37 es verde
-    ledcWrite(pwmChannelV, 200);
+  if (temperatura <= 37.0){
+    ledcWrite(pwmChannelV, 255);
     ledcWrite(pwmChannelA, 0);
     ledcWrite(pwmChannelR, 0);
+
+    ledcWrite(pwmChnlServo, 5);
   }
 
-  if  (temperatura > 37.0 && temperatura < 37.5){//mayor a 37 y menor a 37.5 es
-    ledcWrite(pwmChannelV, 0);//                  amarillo
-    ledcWrite(pwmChannelA, 200);
+  if  (temperatura > 37.0 && temperatura < 37.5){
+    ledcWrite(pwmChannelV, 0);
+    ledcWrite(pwmChannelA, 255);
     ledcWrite(pwmChannelR, 0);
+
+    ledcWrite(pwmChnlServo,19);
   }
 
-  if (temperatura >= 37.5){//mayor o igual a 37.5 es rojo
+  if (temperatura >= 37.5){
     ledcWrite(pwmChannelV, 0);
     ledcWrite(pwmChannelA, 0);
-    ledcWrite(pwmChannelR, 200);
+    ledcWrite(pwmChannelR, 255);
+
+    ledcWrite(pwmChnlServo, 32);
+  }
+
+}
+
+//*****************************************************************************
+//Funcion temporal de boton para probar servo
+//*****************************************************************************
+void botonTemporal(){
+  
+  if (contBoton == 1 && temporal < 2){
+    temporal = temporal + 1;
+    delay(150);
+    contBoton = 0;
+    delay(150);
+    
+  }
+
+  if (contBoton == 1 && temporal ==2 ){
+    temporal = 0 ;
+    delay(150);
+    contBoton = 0;
+    delay(150);
+  }
+  
+ 
+}
+
+//*****************************************************************************
+//Funcion temporal de boton para probar servo2
+//*****************************************************************************
+
+void temp2(){
+  if(temporal == 0){
+    temperatura = 37.0;
+  }
+
+  if(temporal == 1){
+    temperatura = 37.3;
+  }
+
+  if(temporal == 2){
+    temperatura = 37.5;
+  }
+}
+
+
+//*****************************************************************************
+//Funcion cambio de display
+//*****************************************************************************
+void cambioDisplay(int variable){
+  /**
+   * si el case es 0, se enciende el diplay 1 mostrando el valor de las
+   * decenas. Si case es 1, se enciende el display 2 mostrando el valor de 
+   * las unidades, ademas del punto. Si case es 2 se muestra el valor de
+   * los decimales en el display 3.
+   */
+  switch (variable)
+  {
+  case 0:
+    numDisplay(decena);
+    digitalWrite(Dis1, 1);
+    digitalWrite(Dis2, 0);
+    digitalWrite(Dis3, 0);
+    break;
+
+  case 1:
+    numDisplay(unidad);
+    digitalWrite(Dis1, 0);
+    digitalWrite(Dis2, 1);
+    digitalWrite(Dis3, 0);
+    digitalWrite(p, 1);
+    break;
+
+  case 2:
+    numDisplay(decimal);
+    digitalWrite(Dis1, 0);
+    digitalWrite(Dis2, 0);
+    digitalWrite(Dis3, 1);
+    break;
+  
+  default:
+    break;
   }
 
 }

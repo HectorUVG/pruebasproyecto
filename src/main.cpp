@@ -9,6 +9,7 @@
 
 #include <Arduino.h>
 #include "Displays7seg.h"
+#include "esp_adc_cal.h"
 //*****************************************************************************
 //Definicion de pines
 //*****************************************************************************
@@ -70,7 +71,7 @@ void configurarTimer(void);
 void cambioDisplay(int);
 
 //prototipo para sensor
-//void sensorLM32(void);
+void sens(void);
 
 //*****************************************************************************
 //Variables Globales
@@ -159,14 +160,9 @@ void setup()
 
 void loop()
 {
-  //lectura del sensor
-  if(millis() - lastTime >= sampleTime){
-    lastTime = millis();
-    adcLM35 = analogRead(sensor);
-    voltaje = adcLM35*(3.3/4095.0);
+  //llamar a la funcion que activa el sensor
+  sens();
 
-    Serial.println(adcLM35);
-  }
 
   leds();
   decena = 7;
@@ -370,5 +366,19 @@ void cambioDisplay(int variable)
 }
 
 //*****************************************************************************
-//
+//Funcion para comenzar lectura del sensor
 //*****************************************************************************
+
+void sens(){
+  if(millis() - lastTime >= sampleTime){
+    lastTime = millis();
+    adcLM35 = analogRead(sensor);
+
+    Serial.print("ADC: ");
+    Serial.print(adcLM35);
+    Serial.print(" grados: ");
+
+    temperatura = (analogReadMilliVolts(sensor)/10.0);
+    Serial.println(temperatura);
+  }
+}

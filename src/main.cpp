@@ -73,6 +73,12 @@ void cambioDisplay(int);
 //prototipo para sensor
 void sens(void);
 
+//para el promedio
+void mediaMovilADC(void);
+
+//temperatura a decenas, unidades y decimales
+void tempAUnidades(void);
+
 //*****************************************************************************
 //Variables Globales
 //*****************************************************************************
@@ -104,7 +110,17 @@ int voltaje = 0;
 
 //delays
 unsigned long lastTime;
-unsigned int sampleTime = 100;
+unsigned int sampleTime = 500;
+
+//media movil
+int numLecturas = 10;
+float bufferLecturas[10];
+int indexLecturas = 0;
+long mAvgSuma = 0;
+long adcfiltrado = 0;
+
+//temperatura a decenas, unidades y decimales
+int temp = 0;
 
 
 //*****************************************************************************
@@ -160,14 +176,17 @@ void setup()
 
 void loop()
 {
-  //llamar a la funcion que activa el sensor
-  sens();
+  
+  //llamar a la funcion del promedio
+  mediaMovilADC();
 
+  //definicion de decena unidad y decimal
+  tempAUnidades();
 
   leds();
-  decena = 7;
-  unidad = 4;
-  decimal = 4;
+  //decena = 7;
+  //unidad = 4;
+  //decimal = 4;
  
 /*
   numDisplay(decena);
@@ -192,8 +211,8 @@ void loop()
 
 
   //para prueba
-  botonTemporal();
-  temp2();
+  //botonTemporal();
+  //temp2();
 
   //contadorTimer permite cambiar entre los 3 displays cada 10 milisegundos
   cambioDisplay(contadorTimer);
@@ -365,20 +384,52 @@ void cambioDisplay(int variable)
   }
 }
 
+
+
 //*****************************************************************************
-//Funcion para comenzar lectura del sensor
+//Funcion para media movil
 //*****************************************************************************
 
-void sens(){
+void mediaMovilADC(){
+
   if(millis() - lastTime >= sampleTime){
-    lastTime = millis();
-    adcLM35 = analogRead(sensor);
+    lastTime = millis(); 
+  
 
-    Serial.print("ADC: ");
+    adcLM35 = analogReadMilliVolts(sensor);
+
+    mAvgSuma = mAvgSuma - bufferLecturas[indexLecturas] + adcLM35;
+    bufferLecturas[indexLecturas] = adcLM35;
+    indexLecturas++;
+    if(indexLecturas >= numLecturas){
+      indexLecturas = 0;
+    }
+    adcfiltrado = mAvgSuma/numLecturas;
+
+    temperatura = adcfiltrado/10.0;
+
+    Serial.print("ADCmillivolts: ");
     Serial.print(adcLM35);
-    Serial.print(" grados: ");
-
-    temperatura = (analogReadMilliVolts(sensor)/10.0);
+    Serial.print(" mediaMovil: ");
+    Serial.print(adcfiltrado);
+    Serial.print(" temperatura: ");
     Serial.println(temperatura);
   }
+
+}
+
+//*****************************************************************************
+//Funcion para separar decenas unidades y decimales
+//*****************************************************************************
+
+void tempAUnidades(){
+  /*if(millis() - lastTime >= sampleTime){
+    lastTime = millis();*/
+  temp = adcfiltrado;
+  decena = temp/100;
+  temp = temp - (decena*100);
+  unidad = temp/10;
+  temp = temp - (unidad*10);
+  decimal = temp;
+ 
 }

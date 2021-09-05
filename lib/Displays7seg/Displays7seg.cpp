@@ -1,6 +1,6 @@
 #include "Displays7seg.h"
 
-uint8_t a, b, c, d, e, f, g, p;
+uint8_t a, b, c, pid, e, f, g, p;
 
 void configurarDisplay(uint8_t pina, uint8_t pinb, uint8_t pinc, uint8_t pind, uint8_t pine, uint8_t pinf, uint8_t ping, uint8_t pinp)
 {
@@ -8,7 +8,7 @@ void configurarDisplay(uint8_t pina, uint8_t pinb, uint8_t pinc, uint8_t pind, u
     a = pina;
     b = pinb;
     c = pinc;
-    d = pind;
+    pid = pind;
     e = pine;
     f = pinf;
     g = ping;
@@ -19,7 +19,7 @@ void configurarDisplay(uint8_t pina, uint8_t pinb, uint8_t pinc, uint8_t pind, u
     pinMode(a, OUTPUT);
     pinMode(b, OUTPUT);
     pinMode(e, OUTPUT);
-    pinMode(d, OUTPUT);
+    pinMode(pid, OUTPUT);
     pinMode(c, OUTPUT);
     pinMode(p, OUTPUT);
     digitalWrite(g, 0);
@@ -27,7 +27,7 @@ void configurarDisplay(uint8_t pina, uint8_t pinb, uint8_t pinc, uint8_t pind, u
     digitalWrite(a, 0);
     digitalWrite(b, 0);
     digitalWrite(e, 0);
-    digitalWrite(d, 0);
+    digitalWrite(pid, 0);
     digitalWrite(c, 0);
     digitalWrite(p, 0);
 }
@@ -41,7 +41,7 @@ void numDisplay(uint8_t digito)
         digitalWrite(a, 1);
         digitalWrite(b, 1);
         digitalWrite(c, 1);
-        digitalWrite(d, 1);
+        digitalWrite(pid, 1);
         digitalWrite(e, 1);
         digitalWrite(f, 1);
         digitalWrite(g, 0);
@@ -53,7 +53,7 @@ void numDisplay(uint8_t digito)
         digitalWrite(a, 0);
         digitalWrite(b, 1);
         digitalWrite(c, 1);
-        digitalWrite(d, 0);
+        digitalWrite(pid, 0);
         digitalWrite(e, 0);
         digitalWrite(f, 0);
         digitalWrite(g, 0);
@@ -65,7 +65,7 @@ void numDisplay(uint8_t digito)
         digitalWrite(a, 1);
         digitalWrite(b, 1);
         digitalWrite(c, 0);
-        digitalWrite(d, 1);
+        digitalWrite(pid, 1);
         digitalWrite(e, 1);
         digitalWrite(f, 0);
         digitalWrite(g, 1);
@@ -77,7 +77,7 @@ void numDisplay(uint8_t digito)
         digitalWrite(a, 1);
         digitalWrite(b, 1);
         digitalWrite(c, 1);
-        digitalWrite(d, 1);
+        digitalWrite(pid, 1);
         digitalWrite(e, 0);
         digitalWrite(f, 0);
         digitalWrite(g, 1);
@@ -89,7 +89,7 @@ void numDisplay(uint8_t digito)
         digitalWrite(a, 0);
         digitalWrite(b, 1);
         digitalWrite(c, 1);
-        digitalWrite(d, 0);
+        digitalWrite(pid, 0);
         digitalWrite(e, 0);
         digitalWrite(f, 1);
         digitalWrite(g, 1);
@@ -101,7 +101,7 @@ void numDisplay(uint8_t digito)
         digitalWrite(a, 1);
         digitalWrite(b, 0);
         digitalWrite(c, 1);
-        digitalWrite(d, 1);
+        digitalWrite(pid, 1);
         digitalWrite(e, 0);
         digitalWrite(f, 1);
         digitalWrite(g, 1);
@@ -113,7 +113,7 @@ void numDisplay(uint8_t digito)
         digitalWrite(a, 1);
         digitalWrite(b, 0);
         digitalWrite(c, 1);
-        digitalWrite(d, 1);
+        digitalWrite(pid, 1);
         digitalWrite(e, 1);
         digitalWrite(f, 1);
         digitalWrite(g, 1);
@@ -125,7 +125,7 @@ void numDisplay(uint8_t digito)
         digitalWrite(a, 1);
         digitalWrite(b, 1);
         digitalWrite(c, 1);
-        digitalWrite(d, 0);
+        digitalWrite(pid, 0);
         digitalWrite(e, 0);
         digitalWrite(f, 0);
         digitalWrite(g, 0);
@@ -137,11 +137,11 @@ void numDisplay(uint8_t digito)
         digitalWrite(a, 1);
         digitalWrite(b, 1);
         digitalWrite(c, 1);
-        digitalWrite(d, 1);
+        digitalWrite(pid, 1);
         digitalWrite(e, 1);
         digitalWrite(f, 1);
         digitalWrite(g, 1);
-        digitalWrite(p, 1);
+        digitalWrite(p, 0);
 
         break;
 
@@ -149,7 +149,19 @@ void numDisplay(uint8_t digito)
         digitalWrite(a, 1);
         digitalWrite(b, 1);
         digitalWrite(c, 1);
-        digitalWrite(d, 1);
+        digitalWrite(pid, 1);
+        digitalWrite(e, 0);
+        digitalWrite(f, 0);
+        digitalWrite(g, 0);
+        digitalWrite(p, 0);
+
+        break;
+
+    case 10:
+        digitalWrite(a, 0);
+        digitalWrite(b, 0);
+        digitalWrite(c, 0);
+        digitalWrite(pid, 0);
         digitalWrite(e, 0);
         digitalWrite(f, 0);
         digitalWrite(g, 0);

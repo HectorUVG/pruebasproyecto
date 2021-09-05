@@ -25,7 +25,7 @@
 #define a 33
 #define b 32
 #define e 3
-#define d 5
+#define d 1
 #define c 22
 #define p 23
 
@@ -33,12 +33,12 @@
 #define prescaler 80
 
 //leds
-#define ledV 0
-#define ledA 2
-#define ledR 15
-#define pwmChannelV 5 // 16 canales 0-15
-#define pwmChannelA 4
-#define pwmChannelR 3
+#define ledR 0
+#define ledG 2
+#define ledB 15
+#define pwmChannelR 5 // 16 canales 0-15
+#define pwmChannelG 4
+#define pwmChannelB 3
 #define freqPWM 5000 // Frecuencia en Hz
 #define resolution 8 // 1-16 bits de resolución
 //boton
@@ -91,9 +91,9 @@ int contadorTimer = 0;
 float temperatura = 0.0;
 
 //variables al separar el valor del sensor
-int decena = 0;
-int unidad = 0;
-int decimal = 0;
+int decena = 10;
+int unidad = 10;
+int decimal = 10;
 
 //var para el interruptor del boton
 int banderaB1 = 0;
@@ -178,44 +178,22 @@ void loop()
 {
   
   //llamar a la funcion del promedio
-  mediaMovilADC();
+  //mediaMovilADC();
 
   //definicion de decena unidad y decimal
-  tempAUnidades();
+  //tempAUnidades();
 
   leds();
-  //decena = 7;
-  //unidad = 4;
-  //decimal = 4;
- 
-/*
-  numDisplay(decena);
-  digitalWrite(Dis1, 1);
-  digitalWrite(Dis2, 0);
-  digitalWrite(Dis3, 0);
-  delay(5);
-
-  numDisplay(unidad);
-  digitalWrite(Dis1, 0);
-  digitalWrite(Dis2, 1);
-  digitalWrite(Dis3, 0);
-  digitalWrite(p, 1);
-
-  delay(5);
-
-  numDisplay(decimal);
-  digitalWrite(Dis1, 0);
-  digitalWrite(Dis2, 0);
-  digitalWrite(Dis3, 1);
-  delay(5);*/
-
 
   //para prueba
-  //botonTemporal();
-  //temp2();
+  botonTemporal();
+  temp2();
 
   //contadorTimer permite cambiar entre los 3 displays cada 10 milisegundos
   cambioDisplay(contadorTimer);
+  
+
+  
 }
 
 //*****************************************************************************
@@ -252,16 +230,16 @@ void configurarPWM(void)
 {
 
   // Paso 1: Configurar el módulo PWM
-  ledcSetup(pwmChannelV, freqPWM, resolution);
-  ledcSetup(pwmChannelA, freqPWM, resolution);
   ledcSetup(pwmChannelR, freqPWM, resolution);
+  ledcSetup(pwmChannelG, freqPWM, resolution);
+  ledcSetup(pwmChannelB, freqPWM, resolution);
 
   ledcSetup(pwmChnlServo, freqPWMServo, resolution);
 
   // Paso 2: seleccionar en que GPIO tendremos nuestra señal PWM
-  ledcAttachPin(ledV, pwmChannelV);
-  ledcAttachPin(ledA, pwmChannelA);
   ledcAttachPin(ledR, pwmChannelR);
+  ledcAttachPin(ledG, pwmChannelG);
+  ledcAttachPin(ledB, pwmChannelB);
 
   ledcAttachPin(servo, pwmChnlServo);
 }
@@ -273,27 +251,27 @@ void leds()
 {
   if (temperatura <= 37.0)
   {
-    ledcWrite(pwmChannelV, 255);
-    ledcWrite(pwmChannelA, 0);
-    ledcWrite(pwmChannelR, 0);
+    ledcWrite(pwmChannelR, 255);
+    ledcWrite(pwmChannelG, 0);
+    ledcWrite(pwmChannelB, 255);
 
     ledcWrite(pwmChnlServo, 5);
   }
 
   if (temperatura > 37.0 && temperatura < 37.5)
   {
-    ledcWrite(pwmChannelV, 0);
-    ledcWrite(pwmChannelA, 255);
     ledcWrite(pwmChannelR, 0);
+    ledcWrite(pwmChannelG, 0);
+    ledcWrite(pwmChannelB, 255);
 
     ledcWrite(pwmChnlServo, 19);
   }
 
   if (temperatura >= 37.5)
   {
-    ledcWrite(pwmChannelV, 0);
-    ledcWrite(pwmChannelA, 0);
-    ledcWrite(pwmChannelR, 255);
+    ledcWrite(pwmChannelR, 0);
+    ledcWrite(pwmChannelG, 255);
+    ledcWrite(pwmChannelB, 255);
 
     ledcWrite(pwmChnlServo, 32);
   }
@@ -416,6 +394,8 @@ void mediaMovilADC(){
     Serial.println(temperatura);
   }
 
+
+
 }
 
 //*****************************************************************************
@@ -425,6 +405,8 @@ void mediaMovilADC(){
 void tempAUnidades(){
   /*if(millis() - lastTime >= sampleTime){
     lastTime = millis();*/
+  
+  
   temp = adcfiltrado;
   decena = temp/100;
   temp = temp - (decena*100);

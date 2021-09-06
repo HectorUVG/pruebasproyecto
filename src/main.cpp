@@ -15,9 +15,9 @@
 //*****************************************************************************
 
 //displays
-#define Dis1 18
-#define Dis2 19
-#define Dis3 21
+#define Dis1 18 //display1
+#define Dis2 19 //display2
+#define Dis3 21 //display3
 
 //pines del display
 #define g 26
@@ -134,18 +134,17 @@ int decimalLoop = 0;
 
 void IRAM_ATTR ISRTimer0()
 {
+  //interrupcion para cambiar de display
   contadorTimer++; // es como sumarle 1
   if (contadorTimer > 2)
   {
     contadorTimer = 0;
   }
   //de 0 a 2 porque solo tengo 3 displays
-  /*
-  if(contadorTimer == 0){
-    contadorTimer = 1;
-  }*/
+ 
 }
 
+//interrupcion para el boton que realiza las lecturas
 void IRAM_ATTR boton()
 {
   contBoton = 1;
@@ -157,9 +156,9 @@ void IRAM_ATTR boton()
 void setup()
 {
   Serial.begin(115200);
-  lastTime = millis();
+  lastTime = millis();//delay de 500milisegundos
 
-  configurarTimer();
+  configurarTimer(); 
   configurarPWM();
   configurarDisplay(a, b, c, d, e, f, g, p);
 
@@ -188,6 +187,7 @@ void loop()
   //definicion de decena unidad y decimal
   tempAUnidades();
 
+  //para escoger que color de led mostrar
   leds();
 
   //para prueba
@@ -235,11 +235,11 @@ void configurarPWM(void)
 {
 
   // Paso 1: Configurar el módulo PWM
-  ledcSetup(pwmChannelR, freqPWM, resolution);
-  ledcSetup(pwmChannelG, freqPWM, resolution);
-  ledcSetup(pwmChannelB, freqPWM, resolution);
+  ledcSetup(pwmChannelR, freqPWM, resolution);//ledR
+  ledcSetup(pwmChannelG, freqPWM, resolution);//legG
+  ledcSetup(pwmChannelB, freqPWM, resolution);//ledB
 
-  ledcSetup(pwmChnlServo, freqPWMServo, resolution);
+  ledcSetup(pwmChnlServo, freqPWMServo, resolution);//servo motor
 
   // Paso 2: seleccionar en que GPIO tendremos nuestra señal PWM
   ledcAttachPin(ledR, pwmChannelR);
@@ -256,7 +256,11 @@ void leds()
 {
   if (temperaturaLoop <= 37.0)
   {
-    ledcWrite(pwmChannelR, 255);
+    /**
+     * ya que el led RGB es de anodo comun, se debe colocar 0 en el ledcWrite que 
+     * se desea encender 
+     */
+    ledcWrite(pwmChannelR, 255);//se muestra color verde
     ledcWrite(pwmChannelG, 0);
     ledcWrite(pwmChannelB, 255);
 
@@ -265,7 +269,7 @@ void leds()
 
   if (temperaturaLoop > 37.0 && temperatura < 37.5)
   {
-    ledcWrite(pwmChannelR, 0);
+    ledcWrite(pwmChannelR, 0);//se muestra Rojo + Verde = amarillo
     ledcWrite(pwmChannelG, 0);
     ledcWrite(pwmChannelB, 255);
 
@@ -274,7 +278,7 @@ void leds()
 
   if (temperaturaLoop >= 37.5)
   {
-    ledcWrite(pwmChannelR, 0);
+    ledcWrite(pwmChannelR, 0);//se muestra rojo
     ledcWrite(pwmChannelG, 255);
     ledcWrite(pwmChannelB, 255);
 
@@ -283,11 +287,11 @@ void leds()
 }
 
 //*****************************************************************************
-//Funcion temporal de boton para probar servo
+//Funcion para tomar datos mediante el boton
 //*****************************************************************************
 void botonTemporal()
 {
-  /*
+  /*////Codigo de prueba en caso de emergencia/////
   if (contBoton == 1 && temporal < 2)
   {
     temporal = temporal + 1;
@@ -304,15 +308,21 @@ void botonTemporal()
     delay(150);
   }*/
 
-  if (contBoton == 1 )
+/**
+ * Esta funcion sirve para tomar los datos de los valorqe que queremos desplegar, 
+ * si que estos cambien siempre, ya que solo se quiere tomar un dato cada vez que
+ * se presiona el boton. Las variables-Loop solo toman los datos de las otras 
+ * variables en las ecuaciones.
+ * */ 
+  if (contBoton == 1 )//si se presiona el boton 
   {
     temperaturaLoop = temperatura;
     decenaLoop = decena;
     unidadLoop = unidad;
     decimalLoop = decimal;
-    delay(150);
+    //delay(150);
     contBoton = 0;
-    delay(150);
+    //delay(150);
   }
 
 }
@@ -320,7 +330,7 @@ void botonTemporal()
 //*****************************************************************************
 //Funcion temporal de boton para probar servo2
 //*****************************************************************************
-
+/*
 void temp2()
 {
   if (temporal == 0)
@@ -337,7 +347,7 @@ void temp2()
   {
     temperatura = 37.5;
   }
-}
+}*/
 
 //*****************************************************************************
 //Funcion cambio de display
@@ -364,7 +374,8 @@ void cambioDisplay(int variable)
     digitalWrite(Dis1, 0);
     digitalWrite(Dis2, 1);
     digitalWrite(Dis3, 0);
-    digitalWrite(p, 1);
+    digitalWrite(p, 1);//enciende el punto en el display 2 para indicar 
+    //que el display siguiente muestra decimales
     break;
 
   case 2:
@@ -375,6 +386,10 @@ void cambioDisplay(int variable)
     break;
 
   default:
+
+    digitalWrite(Dis1, 0);
+    digitalWrite(Dis2, 0);
+    digitalWrite(Dis3, 0);
     break;
   }
 }
@@ -388,10 +403,10 @@ void cambioDisplay(int variable)
 void mediaMovilADC(){
 
   if(millis() - lastTime >= sampleTime){
-    lastTime = millis(); 
+    lastTime = millis(); //el if es un delay de 500milisegundos
   
 
-    adcLM35 = analogReadMilliVolts(sensor);
+    adcLM35 = analogReadMilliVolts(sensor);//realiza la lectura convirtiendo a voltios
 
     mAvgSuma = mAvgSuma - bufferLecturas[indexLecturas] + adcLM35;
     bufferLecturas[indexLecturas] = adcLM35;
@@ -420,9 +435,11 @@ void mediaMovilADC(){
 //*****************************************************************************
 
 void tempAUnidades(){
-  /*if(millis() - lastTime >= sampleTime){
-    lastTime = millis();*/
   
+  /**
+   * Esta funcion descompone la temperatura para poder identificar las
+   * decenas, unidades y decimales
+   */
   
   temp = adcfiltrado;
   decena = temp/100;

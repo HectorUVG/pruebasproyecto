@@ -122,6 +122,11 @@ long adcfiltrado = 0;
 //temperatura a decenas, unidades y decimales
 int temp = 0;
 
+//variables para desplegar
+float temperaturaLoop = 0;
+int decenaLoop = 0;
+int unidadLoop = 0;
+int decimalLoop = 0;
 
 //*****************************************************************************
 //ISR
@@ -178,16 +183,16 @@ void loop()
 {
   
   //llamar a la funcion del promedio
-  //mediaMovilADC();
+  mediaMovilADC();
 
   //definicion de decena unidad y decimal
-  //tempAUnidades();
+  tempAUnidades();
 
   leds();
 
   //para prueba
   botonTemporal();
-  temp2();
+  //temp2();
 
   //contadorTimer permite cambiar entre los 3 displays cada 10 milisegundos
   cambioDisplay(contadorTimer);
@@ -249,7 +254,7 @@ void configurarPWM(void)
 //*****************************************************************************
 void leds()
 {
-  if (temperatura <= 37.0)
+  if (temperaturaLoop <= 37.0)
   {
     ledcWrite(pwmChannelR, 255);
     ledcWrite(pwmChannelG, 0);
@@ -258,7 +263,7 @@ void leds()
     ledcWrite(pwmChnlServo, 5);
   }
 
-  if (temperatura > 37.0 && temperatura < 37.5)
+  if (temperaturaLoop > 37.0 && temperatura < 37.5)
   {
     ledcWrite(pwmChannelR, 0);
     ledcWrite(pwmChannelG, 0);
@@ -267,7 +272,7 @@ void leds()
     ledcWrite(pwmChnlServo, 19);
   }
 
-  if (temperatura >= 37.5)
+  if (temperaturaLoop >= 37.5)
   {
     ledcWrite(pwmChannelR, 0);
     ledcWrite(pwmChannelG, 255);
@@ -282,7 +287,7 @@ void leds()
 //*****************************************************************************
 void botonTemporal()
 {
-
+  /*
   if (contBoton == 1 && temporal < 2)
   {
     temporal = temporal + 1;
@@ -297,7 +302,19 @@ void botonTemporal()
     delay(150);
     contBoton = 0;
     delay(150);
+  }*/
+
+  if (contBoton == 1 )
+  {
+    temperaturaLoop = temperatura;
+    decenaLoop = decena;
+    unidadLoop = unidad;
+    decimalLoop = decimal;
+    delay(150);
+    contBoton = 0;
+    delay(150);
   }
+
 }
 
 //*****************************************************************************
@@ -336,14 +353,14 @@ void cambioDisplay(int variable)
   switch (variable)
   {
   case 0:
-    numDisplay(decena);
+    numDisplay(decenaLoop);
     digitalWrite(Dis1, 1);
     digitalWrite(Dis2, 0);
     digitalWrite(Dis3, 0);
     break;
 
   case 1:
-    numDisplay(unidad);
+    numDisplay(unidadLoop);
     digitalWrite(Dis1, 0);
     digitalWrite(Dis2, 1);
     digitalWrite(Dis3, 0);
@@ -351,7 +368,7 @@ void cambioDisplay(int variable)
     break;
 
   case 2:
-    numDisplay(decimal);
+    numDisplay(decimalLoop);
     digitalWrite(Dis1, 0);
     digitalWrite(Dis2, 0);
     digitalWrite(Dis3, 1);

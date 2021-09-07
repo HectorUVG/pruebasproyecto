@@ -10,9 +10,25 @@
 #include <Arduino.h>
 #include "Displays7seg.h"
 #include "esp_adc_cal.h"
+
+// comment out the following lines if you are using fona or ethernet
+#include "AdafruitIO_WiFi.h"
+
 //*****************************************************************************
 //Definicion de pines
 //*****************************************************************************
+
+/************************ Adafruit IO Config *******************************/
+
+// visit io.adafruit.com if you need to create an account,
+// or if you need your Adafruit IO key.
+#define IO_USERNAME  "hector19511"
+#define IO_KEY       "aio_Slxz93Yk7lB0mIUTNX7Ahk9lFlMa"
+
+/******************************* WIFI **************************************/
+#define WIFI_SSID "TIGO-45B1_Ext"
+#define WIFI_PASS "2NJ555305153"
+AdafruitIO_WiFi io(IO_USERNAME, IO_KEY, WIFI_SSID, WIFI_PASS);//definicion de io
 
 //displays
 #define Dis1 18 //display1
@@ -52,7 +68,7 @@
 //#define resolution 8  // 1-16 bits de resolución  creo que sobra
 
 //sensor
-#define sensor 14
+#define sensor 36
 
 //*****************************************************************************
 //Prototipos de funciones
@@ -79,6 +95,8 @@ void mediaMovilADC(void);
 //temperatura a decenas, unidades y decimales
 void tempAUnidades(void);
 
+//adafruit
+void adafruit(void);
 //*****************************************************************************
 //Variables Globales
 //*****************************************************************************
@@ -91,9 +109,9 @@ int contadorTimer = 0;
 float temperatura = 0.0;
 
 //variables al separar el valor del sensor
-int decena = 10;
-int unidad = 10;
-int decimal = 10;
+int decena = 0;
+int unidad = 0;
+int decimal = 0;
 
 //var para el interruptor del boton
 int banderaB1 = 0;
@@ -108,9 +126,13 @@ int temporal = 0;
 int adcLM35 = 0;
 int voltaje = 0;
 
-//delays
+//delay1
 unsigned long lastTime;
 unsigned int sampleTime = 500;
+
+//delay1
+unsigned long lastTime2;
+unsigned int sampleTime2 = 3000;
 
 //media movil
 int numLecturas = 10;
@@ -127,6 +149,14 @@ float temperaturaLoop = 0;
 int decenaLoop = 0;
 int unidadLoop = 0;
 int decimalLoop = 0;
+
+//adafruit
+// this int will hold the current count for our sketch
+//int count = 0;
+
+// set up the 'counter' feed
+AdafruitIO_Feed *ada = io.feed("temperaturaesp32");
+
 
 //*****************************************************************************
 //ISR
@@ -157,6 +187,7 @@ void setup()
 {
   Serial.begin(115200);
   lastTime = millis();//delay de 500milisegundos
+  lastTime2 = millis();//delay de 3000milisegundos
 
   configurarTimer(); 
   configurarPWM();
@@ -173,14 +204,39 @@ void setup()
   //boton
   pinMode(Boton1, INPUT_PULLUP);
   attachInterrupt(Boton1, boton, RISING);
+
+  //adafruit
+   // wait for serial monitor to open
+  while(! Serial);
+
+  Serial.print("Connecting to Adafruit IO");
+
+  // connect to io.adafruit.com
+  io.connect();
+
+  // wait for a connection
+  while(io.status() < AIO_CONNECTED) {
+    if(millis() - lastTime >= sampleTime){
+      lastTime = millis();
+      Serial.print(".");
+    }
+
+  }
+  // we are connected
+  Serial.println();
+  Serial.println(io.statusText());
+
 }
+
+
 //*****************************************************************************
 //Loop principal
 //*****************************************************************************
 
 void loop()
 {
-  
+
+
   //llamar a la funcion del promedio
   mediaMovilADC();
 
@@ -196,8 +252,9 @@ void loop()
 
   //contadorTimer permite cambiar entre los 3 displays cada 10 milisegundos
   cambioDisplay(contadorTimer);
-  
 
+    
+  adafruit();
   
 }
 
@@ -417,7 +474,7 @@ void mediaMovilADC(){
     adcfiltrado = mAvgSuma/numLecturas;
 
     temperatura = adcfiltrado/10.0;
-
+    
     Serial.print("ADCmillivolts: ");
     Serial.print(adcLM35);
     Serial.print(" mediaMovil: ");
@@ -448,4 +505,33 @@ void tempAUnidades(){
   temp = temp - (unidad*10);
   decimal = temp;
  
+}
+
+//*****************************************************************************
+//Funcion para adafruit
+//*****************************************************************************
+void adafruit(){
+
+   if(millis() - lastTime2 >= sampleTime2){
+    lastTime2 = millis(); 
+    // Adafruit IO is rate limited for publishing, so a delay is required in
+    // between feed->save events. In this example, we will wait three seconds
+    // (1000 milliseconds == 1 second) during each loop.
+  
+    //adafruit
+    // io.run(); is required for all sketches.
+    // it should always be present at the top of your loop
+    // function. it keeps the client connected to
+    // io.adafruit.com, and processes any incoming data.
+    io.run();
+
+    // save count to the 'counter' feed on Adafruit IO
+    Serial.print("sending -> ");
+    Serial.println(temperatura);
+    ada->save(temperatura);
+
+
+    
+  }
+
 }

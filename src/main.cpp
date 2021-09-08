@@ -1,15 +1,15 @@
 //Hector Manuel de Leon Salguero
 //Universidad del Valle de Guatmala
-//
-//
-//
+//19511
+//Proyecto 1 
+//Electronica digital 2
 //*****************************************************************************
 //Librerias
 //*****************************************************************************
 
 #include <Arduino.h>
 #include "Displays7seg.h"
-#include "esp_adc_cal.h"
+//#include "esp_adc_cal.h"
 
 // comment out the following lines if you are using fona or ethernet
 #include "AdafruitIO_WiFi.h"
@@ -23,7 +23,7 @@
 // visit io.adafruit.com if you need to create an account,
 // or if you need your Adafruit IO key.
 #define IO_USERNAME  "hector19511"
-#define IO_KEY       "aio_Slxz93Yk7lB0mIUTNX7Ahk9lFlMa"
+#define IO_KEY       "aio_TvpC67Q7uy1aHwCm6Pzx3kOKMJK1"
 
 /******************************* WIFI **************************************/
 #define WIFI_SSID "TIGO-45B1_Ext"
@@ -68,13 +68,13 @@ AdafruitIO_WiFi io(IO_USERNAME, IO_KEY, WIFI_SSID, WIFI_PASS);//definicion de io
 //#define resolution 8  // 1-16 bits de resolución  creo que sobra
 
 //sensor
-#define sensor 36
+#define sensor 34
 
 //*****************************************************************************
 //Prototipos de funciones
 //*****************************************************************************
-void configurarPWM(void);
-void leds(void);
+void figurarPWM(void);
+void ledcons(void);
 void boton(void);
 
 //para prueba
